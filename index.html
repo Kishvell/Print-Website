@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estudio Imprimible | Catálogo de Plantillas</title>
+    <meta name="description" content="Empresa de Impresión y Diseño">
+    <meta name="keywords" content="impresión, diseño, plantillas, agendas">
+    <meta name="author" content="Kishvell">
+    <meta property="og:title" content="Kishvell | Empresa de Impresión y Diseño">
+    <meta property="og:description" content="Empresa de Impresión y Diseño">
+    <meta property="og:image" content="./img/profile.jpeg">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="es_AR">
+    <link rel="icon" href="./images/icons8-print.gif" type="image/gif">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+    <!-- Header / Navbar -->
+    <header class="navbar">
+        <div class="container navbar-content">
+            <div class="brand">
+                <span class="brand-icon">✦</span>
+                <span class="brand-title">Estudio Imprimible</span>
+            </div>
+            <nav class="nav-links">
+                <a href="#">Inicio</a>
+                <a href="#catalogo" class="active">Colección</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container hero-content">
+            <span class="badge">Recursos Listos para Imprimir</span>
+            <h1>Plantillas y Agendas</h1>
+            <p>Descarga, personaliza e imprime organizadores diseñados para optimizar tu día a día.</p>
+        </div>
+    </section>
+
+    <!-- Barra de Búsqueda -->
+    <div class="search-container container">
+        <input type="text" id="searchInput" placeholder="🔍 Buscar plantillas (ej. Agenda, LDS, Informe...)"
+            class="search-input">
+    </div>
+
+    <!-- Filtros de Categorías (Actualizados) -->
+    <section class="filters container" id="catalogo">
+        <button class="filter-btn active" data-filter="all">Todos</button>
+        <button class="filter-btn" data-filter="lds">LDS / Espiritual</button>
+        <button class="filter-btn" data-filter="organizacion">Organización</button>
+        <button class="filter-btn" data-filter="informe">Informe</button>
+        <!-- Botón para agregar filtro dinámico -->
+        <button class="filter-btn btn-add-filter" id="btnNuevoFiltro">+ Agregar Filtro</button>
+    </section>
+
+    <!-- Grilla de Productos Imprimibles -->
+    <main class="container catalog-grid" id="catalogGrid">
+
+        <!-- ITEM 1: Agenda Semanal LDS -->
+        <article class="card" data-category="lds">
+            <div class="card-preview">
+                <div class="preview-badge">A4 / Carta</div>
+                <svg class="card-svg" viewBox="0 0 100 130" xmlns="http://www.w3.org/2000/svg">
+                    <g stroke="#2c3e50" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <path
+                            d="M10,120 L90,120 M15,120 L15,85 L35,85 L35,65 L45,65 L45,35 L50,15 L55,35 L55,65 L65,65 L65,85 L85,85 L85,120" />
+                        <path d="M25,120 L25,95 L35,95" opacity="0.5" />
+                        <path d="M75,120 L75,95 L65,95" opacity="0.5" />
+                        <path d="M46,120 L46,105 Q50,100 54,105 L54,120" />
+                        <path d="M50,15 L50,5 M50,5 L54,2 M50,5 L48,8" />
+                    </g>
+                </svg>
+            </div>
+            <div class="card-body">
+                <span class="card-tag">LDS • Espiritual</span>
+                <h2 class="card-title">Agenda Semanal LDS: Mi Camino al Templo</h2>
+                <p class="card-desc">Planificador semanal con registro de escrituras, metas flexibles y reflexión.</p>
+                <div class="card-footer">
+                    <button class="btn btn-outline btn-preview" data-target="agenda_lds.html"
+                        data-title="Agenda Semanal LDS">👁️ Vista Previa</button>
+                    <button class="btn btn-primary btn-print-direct" data-target="agenda_lds.html">🖨️ Imprimir</button>
+                </div>
+            </div>
+        </article>
+
+        <!-- ITEM 2: Agregar Nuevo -->
+        <article class="card card-add-new" id="cardAddNew" data-always-show="true">
+            <div class="card-body">
+                <div class="icon-add">➕</div>
+                <h2 class="card-title">Agregar Nuevo Imprimible</h2>
+                <p class="card-desc">Sube tu propio archivo PDF o Word, ponle una imagen de presentación y asígnale un
+                    filtro.</p>
+                <div class="card-footer" style="width: 100%;">
+                    <button class="btn btn-outline" id="btnOpenAddModal">Subir Plantilla</button>
+                </div>
+            </div>
+        </article>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container footer-content">
+            <p>© 2026 Estudio Imprimible <a href="https://github.com/Kishvell">by Kishvell</a>. Diseñado para impresión limpia y eficiente.</p>
+        </div>
+    </footer>
+
+    <iframe id="printIframe" style="display:none;" title="Impresión oculta"></iframe>
+
+    <!-- 1. MODAL: Agregar Nuevo Documento -->
+    <div id="addModal" class="modal" aria-hidden="true">
+        <div class="modal-overlay close-add-modal"></div>
+        <div class="modal-container" style="max-width: 500px; height: auto;">
+            <header class="modal-header">
+                <h3>Subir Nuevo Documento</h3>
+                <button class="modal-close close-add-modal" aria-label="Cerrar">&times;</button>
+            </header>
+            <div class="modal-body" style="padding: 20px;">
+                <form id="addPrintableForm" class="add-form">
+                    <div class="form-group">
+                        <label>Título de la Plantilla</label>
+                        <input type="text" id="newTitle" required placeholder="Ej. Planificador Mensual">
+                    </div>
+                    <div class="form-group">
+                        <label>Categoría / Filtro</label>
+                        <select id="newCategory" required>
+                            <option value="lds">LDS / Espiritual</option>
+                            <option value="organizacion">Organización</option>
+                            <option value="informe">Informe</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Imagen de Presentación (JPG/PNG)</label>
+                        <input type="file" id="newImage" accept="image/*" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Archivo del Documento (PDF, Word...)</label>
+                        <input type="file" id="newFile" accept=".pdf,.doc,.docx,.xls,.xlsx" required>
+                    </div>
+                </form>
+            </div>
+            <footer class="modal-footer">
+                <button class="btn btn-outline close-add-modal">Cancelar</button>
+                <button type="submit" form="addPrintableForm" class="btn btn-primary">Subir Archivo</button>
+            </footer>
+        </div>
+    </div>
+
+    <!-- 2. MODAL: Vista Previa -->
+    <div id="previewModal" class="modal" aria-hidden="true">
+        <div class="modal-overlay" id="modalOverlay"></div>
+        <div class="modal-container">
+            <header class="modal-header">
+                <h3 id="modalTitle">Vista Previa del Documento</h3>
+                <button class="modal-close" id="modalClose" aria-label="Cerrar">&times;</button>
+            </header>
+            <div class="modal-body">
+                <iframe id="modalIframe" src="" title="Vista Previa Imprimible"></iframe>
+            </div>
+            <footer class="modal-footer">
+                <button class="btn btn-outline" id="modalCloseBtn">Volver</button>
+                <a href="#" id="modalOpenBtn" target="_blank" class="btn btn-outline">Abrir Archivo</a>
+                <button class="btn btn-primary" id="modalPrintBtn">🖨️ Imprimir / Descargar</button>
+            </footer>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>

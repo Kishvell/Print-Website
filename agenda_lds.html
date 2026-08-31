@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agenda Semanal LDS - Mi Camino al Templo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Inter:wght@300;400;600&display=swap"
+        rel="stylesheet">
+
+    <style>
+        /* --- ESTILOS BASE --- */
+        :root {
+            --border-color: #2c3e50;
+            --text-main: #1e293b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #e2e8f0;
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+        }
+
+        /* --- VISUALIZACIÓN EN PANTALLA (Efecto Papel) --- */
+        .page {
+            background: white;
+            width: 210mm;
+            /* Tamaño A4 */
+            min-height: 297mm;
+            padding: 15mm;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            border-radius: 4px;
+            position: relative;
+        }
+
+        /* Botón de impresión independiente (Se oculta al imprimir) */
+        .no-print-bar {
+            margin-bottom: 20px;
+        }
+
+        .btn-print {
+            background-color: #0f172a;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: background 0.2s;
+        }
+
+        .btn-print:hover {
+            background-color: #334155;
+        }
+
+        /* --- DISEÑO DE LA AGENDA --- */
+        header {
+            text-align: center;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+
+        .header-titles h1 {
+            font-family: 'Cinzel', serif;
+            font-size: 26px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+            text-align: left;
+        }
+
+        .header-titles p {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #475569;
+            text-align: left;
+        }
+
+        .date-input {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        /* Layout Principal */
+        .grid-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            height: calc(100% - 80px);
+            /* Ocupa el resto de la hoja */
+        }
+
+        /* Columna Izquierda: Días */
+        .days-column {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .day-box {
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            flex-grow: 1;
+            padding: 8px;
+            min-height: 90px;
+        }
+
+        .day-box h3 {
+            font-family: 'Cinzel', serif;
+            font-size: 14px;
+            border-bottom: 1px dashed #cbd5e1;
+            padding-bottom: 4px;
+            margin-bottom: 8px;
+        }
+
+        /* Columna Derecha: Metas y Reflexión */
+        .tools-column {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .tool-box {
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 12px;
+            background-color: #f8fafc;
+        }
+
+        .tool-box h3 {
+            font-family: 'Cinzel', serif;
+            font-size: 15px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Registro de Escrituras */
+        .scripture-tracker {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            padding: 0 10px;
+        }
+
+        .tracker-day {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .circle {
+            width: 18px;
+            height: 18px;
+            border: 1px solid var(--border-color);
+            border-radius: 50%;
+            background: white;
+        }
+
+        /* Líneas para escribir */
+        .writing-lines {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-top: 15px;
+        }
+
+        .line {
+            border-bottom: 1px solid #94a3b8;
+            width: 100%;
+        }
+
+        .dotted-line {
+            border-bottom: 1px dashed #94a3b8;
+            width: 100%;
+            margin-top: 25px;
+        }
+
+        /* Checklist de Metas */
+        .goal-list {
+            list-style: none;
+            margin-top: 10px;
+        }
+
+        .goal-list li {
+            display: flex;
+            align-items: flex-end;
+            margin-bottom: 15px;
+            font-size: 13px;
+        }
+
+        .goal-list .box {
+            width: 14px;
+            height: 14px;
+            border: 1px solid var(--border-color);
+            margin-right: 8px;
+            background: white;
+        }
+
+        .goal-list .text {
+            width: 70px;
+            font-weight: 600;
+        }
+
+        .goal-list .fill-line {
+            flex-grow: 1;
+            border-bottom: 1px solid #94a3b8;
+            margin-left: 5px;
+        }
+
+        /* --- ESTILOS DE IMPRESIÓN --- */
+        @media print {
+            @page {
+                size: A4 portrait;
+                margin: 10mm;
+            }
+
+            body {
+                background: none;
+                padding: 0;
+            }
+
+            .no-print-bar {
+                display: none !important;
+                /* Oculta el botón al imprimir */
+            }
+
+            .page {
+                box-shadow: none;
+                border: none;
+                width: 100%;
+                min-height: 100%;
+                padding: 0;
+            }
+
+            .tool-box {
+                background-color: transparent !important;
+                /* Ahorra tinta */
+            }
+
+            /* Fuerza bordes negros definidos para impresoras B/N */
+            * {
+                color: black !important;
+                border-color: black !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Barra de control (Solo visible en pantalla) -->
+    <div class="no-print-bar">
+        <button class="btn-print" onclick="window.print()">🖨️ Imprimir Agenda</button>
+    </div>
+
+    <!-- Hoja de la Agenda -->
+    <div class="page">
+
+        <!-- Encabezado -->
+        <header>
+            <div class="header-titles">
+                <h1>Mi Camino al Templo</h1>
+                <p>Planificador Semanal Espiritual</p>
+            </div>
+            <div class="date-input">
+                Semana del: _________________________
+            </div>
+        </header>
+
+        <div class="grid-layout">
+
+            <!-- Columna Izquierda: Días de la semana -->
+            <div class="days-column">
+                <div class="day-box">
+                    <h3>Lunes</h3>
+                </div>
+                <div class="day-box">
+                    <h3>Martes</h3>
+                </div>
+                <div class="day-box">
+                    <h3>Miércoles</h3>
+                </div>
+                <div class="day-box">
+                    <h3>Jueves</h3>
+                </div>
+                <div class="day-box">
+                    <h3>Viernes</h3>
+                </div>
+                <div class="day-box">
+                    <h3>Sábado</h3>
+                </div>
+                <div class="day-box">
+                    <h3>Domingo</h3>
+                </div>
+            </div>
+
+            <!-- Columna Derecha: Herramientas Espirituales -->
+            <div class="tools-column">
+
+                <!-- 1. Registro de Escrituras -->
+                <div class="tool-box">
+                    <h3>📖 Estudio de las Escrituras</h3>
+                    <div class="scripture-tracker">
+                        <div class="tracker-day"><span>L</span>
+                            <div class="circle"></div>
+                        </div>
+                        <div class="tracker-day"><span>M</span>
+                            <div class="circle"></div>
+                        </div>
+                        <div class="tracker-day"><span>M</span>
+                            <div class="circle"></div>
+                        </div>
+                        <div class="tracker-day"><span>J</span>
+                            <div class="circle"></div>
+                        </div>
+                        <div class="tracker-day"><span>V</span>
+                            <div class="circle"></div>
+                        </div>
+                        <div class="tracker-day"><span>S</span>
+                            <div class="circle"></div>
+                        </div>
+                        <div class="tracker-day"><span>D</span>
+                            <div class="circle"></div>
+                        </div>
+                    </div>
+                    <div class="writing-lines">
+                        <div class="line"></div>
+                        <div class="line"></div>
+                    </div>
+                </div>
+
+                <!-- 2. Metas Flexibles -->
+                <div class="tool-box">
+                    <h3>🎯 Metas de la Semana</h3>
+                    <ul class="goal-list">
+                        <li>
+                            <div class="box"></div><span class="text">Espiritual:</span>
+                            <div class="fill-line"></div>
+                        </li>
+                        <li>
+                            <div class="box"></div><span class="text">Familiar:</span>
+                            <div class="fill-line"></div>
+                        </li>
+                        <li>
+                            <div class="box"></div><span class="text">Temporal:</span>
+                            <div class="fill-line"></div>
+                        </li>
+                        <li>
+                            <div class="box"></div><span class="text">Llamamiento:</span>
+                            <div class="fill-line"></div>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- 3. Preparación para el Templo -->
+                <div class="tool-box">
+                    <h3>🏛️ Enfoque de Templo e Historia Familiar</h3>
+                    <p style="font-size: 11px; color: #475569; margin-bottom: 10px;">
+                        <i>Nombres a preparar, indexación, o planes de asistencia al templo.</i>
+                    </p>
+                    <div class="dotted-line"></div>
+                    <div class="dotted-line"></div>
+                </div>
+
+                <!-- 4. Reflexión Semanal (Se expande para llenar el espacio) -->
+                <div class="tool-box" style="flex-grow: 1;">
+                    <h3>✨ Reflexión Semanal</h3>
+                    <p style="font-size: 12px; font-weight: 600; margin-bottom: 15px;">
+                        ¿Cómo vi la mano del Señor en mi vida esta semana?
+                    </p>
+                    <div class="writing-lines">
+                        <div class="line"></div>
+                        <div class="line"></div>
+                        <div class="line"></div>
+                        <div class="line"></div>
+                        <div class="line"></div>
+                        <div class="line"></div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+</body>
+
+</html>
