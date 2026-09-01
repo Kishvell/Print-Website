@@ -1,14 +1,55 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Referencias Globales
+    // --- 1. REFERENCIAS GLOBALES ---
     const searchInput = document.getElementById('searchInput');
     const filtersContainer = document.getElementById('catalogo');
     const grid = document.getElementById('catalogGrid');
     const cardAddNew = document.getElementById('cardAddNew');
     
-    // --- LÓGICA DE FILTROS ---
+    // Referencias de Modales y Formulario
+    const addModal = document.getElementById('addModal');
+    const btnOpenAddModal = document.getElementById('btnOpenAddModal');
+    const closeAddModalEls = document.querySelectorAll('.close-add-modal');
+    const addPrintableForm = document.getElementById('addPrintableForm');
+    const newCategorySelect = document.getElementById('newCategory');
+
+    // Referencias de Vista Previa e Impresión
+    const previewModal = document.getElementById('previewModal');
+    const modalIframe = document.getElementById('modalIframe');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalOpenBtn = document.getElementById('modalOpenBtn');
+    const modalPrintBtn = document.getElementById('modalPrintBtn');
+    const printIframe = document.getElementById('printIframe');
+
+
+    // --- 2. FUNCIONES DE MODALES ---
+    const openPreviewModal = (url, title) => {
+        modalTitle.textContent = title;
+        modalIframe.src = url;
+        modalOpenBtn.href = url;
+        
+        previewModal.classList.add('active');
+        previewModal.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden'; 
+    };
+
+    const closePreviewModal = () => {
+        previewModal.classList.remove('active');
+        previewModal.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+        setTimeout(() => { modalIframe.src = ''; }, 250); 
+    };
+
+    const closeAddModal = () => {
+        addModal.classList.remove('active');
+        addModal.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+        addPrintableForm.reset();
+    };
+
+
+    // --- 3. LÓGICA DE FILTROS ---
     const filterCards = () => {
         const searchTerm = searchInput.value.toLowerCase();
-        // Obtener el filtro activo excluyendo el botón de agregar
         const activeBtn = document.querySelector('.filter-btn.active:not(.btn-add-filter)');
         const activeFilter = activeBtn ? activeBtn.dataset.filter : 'all';
         const cards = document.querySelectorAll('.card');
@@ -36,14 +77,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     searchInput.addEventListener('input', filterCards);
 
-    // Bind initial filter buttons
     const bindFilterEvents = () => {
         document.querySelectorAll('.filter-btn:not(.btn-add-filter)').forEach(btn => {
-            // Eliminar listeners previos para evitar duplicados al agregar nuevos
             btn.replaceWith(btn.cloneNode(true)); 
         });
 
-        // Re-asignar eventos
         document.querySelectorAll('.filter-btn:not(.btn-add-filter)').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 document.querySelectorAll('.filter-btn:not(.btn-add-filter)').forEach(b => b.classList.remove('active'));
@@ -52,12 +90,11 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
     };
-    
     bindFilterEvents();
 
-    // --- AGREGAR NUEVO FILTRO ---
+
+    // --- 4. AGREGAR NUEVO FILTRO ---
     const btnNuevoFiltro = document.getElementById('btnNuevoFiltro');
-    const newCategorySelect = document.getElementById('newCategory');
 
     btnNuevoFiltro.addEventListener('click', () => {
         const nuevoFiltro = prompt('Ingresa el nombre del nuevo filtro/categoría (ej. Finanzas):');
@@ -65,7 +102,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (nuevoFiltro && nuevoFiltro.trim() !== '') {
             const idFiltro = nuevoFiltro.toLowerCase().replace(/\s+/g, '-');
             
-            // 1. Crear el botón de filtro visual
             const newBtn = document.createElement('button');
             newBtn.className = 'filter-btn';
             newBtn.dataset.filter = idFiltro;
@@ -73,43 +109,94 @@ document.addEventListener('DOMContentLoaded', () => {
             
             filtersContainer.insertBefore(newBtn, btnNuevoFiltro);
             
-            // 2. Agregarlo a las opciones del formulario
             const newOption = document.createElement('option');
             newOption.value = idFiltro;
             newOption.textContent = nuevoFiltro;
             newCategorySelect.appendChild(newOption);
             
-            // 3. Re-vincular eventos
             bindFilterEvents();
-            
-            // Seleccionarlo automáticamente
             newBtn.click();
         }
     });
 
-    // --- MODAL DE SUBIR PLANTILLA ---
-    const addModal = document.getElementById('addModal');
-    const btnOpenAddModal = document.getElementById('btnOpenAddModal');
-    const closeAddModalEls = document.querySelectorAll('.close-add-modal');
-    const addPrintableForm = document.getElementById('addPrintableForm');
 
+    // --- 5. LÓGICA DE GUARDADO LOCAL (LOCALSTORAGE) Y SUBIDA ---
+    const CUSTOM_ITEMS_KEY = 'estudio_imprimible_items';
+    let customItems = JSON.parse(localStorage.getItem(CUSTOM_ITEMS_KEY)) || [];
+
+    const readFileAsDataURL = (file) => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = (e) => resolve(e.target.result);
+            reader.onerror = (e) => reject(e);
+            reader.readAsDataURL(file);
+        });
+    };
+
+    const renderCustomCard = (item) => {
+        const newCard = document.createElement('article');
+        newCard.className = 'card';
+        newCard.dataset.category = item.categoryValue;
+        newCard.dataset.id = item.id;
+        
+        newCard.innerHTML = `
+            <div class="card-preview" style="background-image: url('${item.imageBg}'); background-size: cover; background-position: center; border-bottom: 1px solid var(--border); position: relative;">
+                <div class="preview-badge" style="background: var(--accent); color: white; border: none;">Nuevo</div>
+                <button class="btn-delete" title="Borrar plantilla" style="position: absolute; top: 10px; left: 10px; background: #ef4444; color: white; border: none; border-radius: 50%; width: 28px; height: 28px; cursor: pointer; font-size: 14px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">🗑️</button>
+            </div>
+            <div class="card-body">
+                <span class="card-tag">${item.categoryText}</span>
+                <h2 class="card-title">${item.title}</h2>
+                <p class="card-desc">Archivo personalizado subido por el usuario.</p>
+                <div class="card-footer">
+                    <button class="btn btn-outline btn-preview">👁️ Vista Previa</button>
+                    <button class="btn btn-primary btn-print-direct">🖨️ Imprimir</button>
+                </div>
+            </div>
+        `;
+        
+        grid.insertBefore(newCard, cardAddNew);
+        
+        // Evento: Vista Previa (Item Personalizado)
+        newCard.querySelector('.btn-preview').addEventListener('click', () => {
+            openPreviewModal(item.fileData, item.title);
+        });
+
+        // Evento: Imprimir (Item Personalizado)
+        newCard.querySelector('.btn-print-direct').addEventListener('click', () => {
+            printIframe.src = item.fileData;
+            printIframe.onload = () => {
+                setTimeout(() => {
+                    printIframe.contentWindow.focus();
+                    printIframe.contentWindow.print();
+                }, 300);
+            };
+        });
+
+        // Evento: Borrar
+        newCard.querySelector('.btn-delete').addEventListener('click', () => {
+            if(confirm('¿Estás seguro de que deseas eliminar esta plantilla permanentemente?')) {
+                newCard.remove(); 
+                customItems = customItems.filter(i => i.id !== item.id);
+                localStorage.setItem(CUSTOM_ITEMS_KEY, JSON.stringify(customItems));
+            }
+        });
+    };
+
+    // Cargar los items guardados al iniciar
+    customItems.forEach(item => renderCustomCard(item));
+
+    // Abrir modal de subida
     btnOpenAddModal.addEventListener('click', () => {
         addModal.classList.add('active');
         addModal.setAttribute('aria-hidden', 'false');
         document.body.style.overflow = 'hidden';
     });
 
-    const closeAddModal = () => {
-        addModal.classList.remove('active');
-        addModal.setAttribute('aria-hidden', 'true');
-        document.body.style.overflow = '';
-        addPrintableForm.reset();
-    };
-
     closeAddModalEls.forEach(el => el.addEventListener('click', closeAddModal));
 
-    // Procesar el Formulario y Crear la Tarjeta
-    addPrintableForm.addEventListener('submit', (e) => {
+    // Procesar formulario
+    addPrintableForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         
         const title = document.getElementById('newTitle').value;
@@ -119,88 +206,65 @@ document.addEventListener('DOMContentLoaded', () => {
         const imageFile = document.getElementById('newImage').files[0];
         const docFile = document.getElementById('newFile').files[0];
         
-        // Crear URLs locales temporales para mostrar la imagen y el archivo
-        const imageUrl = URL.createObjectURL(imageFile);
-        const docUrl = URL.createObjectURL(docFile);
+        if (!docFile.name.toLowerCase().endsWith('.pdf') && !docFile.name.toLowerCase().endsWith('.html')) {
+            alert("Atención: Para que el botón 'Imprimir' funcione directamente, se recomienda subir archivos .PDF. Otros formatos podrían descargarse en lugar de imprimirse.");
+        }
 
-        // Crear la nueva tarjeta en el HTML
-        const newCard = document.createElement('article');
-        newCard.className = 'card';
-        newCard.dataset.category = categoryValue;
-        
-        newCard.innerHTML = `
-            <div class="card-preview" style="background-image: url('${imageUrl}'); background-size: cover; background-position: center; border-bottom: 1px solid var(--border);">
-                <div class="preview-badge" style="background: var(--accent); color: white; border: none;">Nuevo</div>
-            </div>
-            <div class="card-body">
-                <span class="card-tag">${categoryText}</span>
-                <h2 class="card-title">${title}</h2>
-                <p class="card-desc">Archivo local: ${docFile.name}</p>
-                <div class="card-footer">
-                    <button class="btn btn-outline btn-preview" data-target="${docUrl}" data-title="${title}">👁️ Vista Previa</button>
-                    <a href="${docUrl}" download="${docFile.name}" class="btn btn-primary" style="display:flex; justify-content:center; align-items:center;">💾 Descargar</a>
-                </div>
-            </div>
-        `;
-        
-        // Insertar antes de la tarjeta "Agregar Nuevo"
-        grid.insertBefore(newCard, cardAddNew);
-        
-        // Asignar el evento al nuevo botón de Vista Previa
-        const newPreviewBtn = newCard.querySelector('.btn-preview');
-        newPreviewBtn.addEventListener('click', () => {
-            openPreviewModal(docUrl, title);
-        });
+        try {
+            const submitBtn = addPrintableForm.querySelector('[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Guardando...';
+            submitBtn.disabled = true;
 
-        closeAddModal();
-        filterCards(); // Refrescar vista
+            const imageBase64 = await readFileAsDataURL(imageFile);
+            const docBase64 = await readFileAsDataURL(docFile);
+
+            const newItem = {
+                id: Date.now().toString(),
+                title: title,
+                categoryValue: categoryValue,
+                categoryText: categoryText,
+                imageBg: imageBase64,
+                fileData: docBase64
+            };
+
+            customItems.push(newItem);
+            
+            try {
+                localStorage.setItem(CUSTOM_ITEMS_KEY, JSON.stringify(customItems));
+            } catch(storageError) {
+                alert("Error de memoria: El archivo es demasiado pesado para guardarlo en el navegador. Intenta con un PDF o imagen más ligera.");
+                customItems.pop();
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+                return;
+            }
+
+            renderCustomCard(newItem);
+            closeAddModal();
+            filterCards(); 
+            
+            submitBtn.textContent = originalText;
+            submitBtn.disabled = false;
+
+        } catch (error) {
+            console.error("Error al procesar los archivos:", error);
+            alert("Hubo un error al leer los archivos.");
+        }
     });
 
-    // --- MODAL DE VISTA PREVIA & IMPRESIÓN ---
-    const previewModal = document.getElementById('previewModal');
-    const modalIframe = document.getElementById('modalIframe');
-    const modalTitle = document.getElementById('modalTitle');
-    const modalOpenBtn = document.getElementById('modalOpenBtn');
-    const modalPrintBtn = document.getElementById('modalPrintBtn');
-    const printIframe = document.getElementById('printIframe');
 
-    const openPreviewModal = (url, title) => {
-        modalTitle.textContent = title;
-        modalIframe.src = url;
-        modalOpenBtn.href = url;
-        
-        previewModal.classList.add('active');
-        previewModal.setAttribute('aria-hidden', 'false');
-        document.body.style.overflow = 'hidden'; 
-    };
-
-    // Vincular Vista Previa a los botones existentes
-    document.querySelectorAll('.btn-preview').forEach(btn => {
+    // --- 6. EVENTOS GENERALES (ÍTEMS ORIGINALES Y MODALES) ---
+    
+    // Vista previa de items cargados en el HTML original
+    document.querySelectorAll('.card:not([data-id]) .btn-preview').forEach(btn => {
         btn.addEventListener('click', () => {
             openPreviewModal(btn.dataset.target, btn.dataset.title || 'Vista Previa');
         });
     });
 
-    const closePreviewModal = () => {
-        previewModal.classList.remove('active');
-        previewModal.setAttribute('aria-hidden', 'true');
-        document.body.style.overflow = '';
-        setTimeout(() => { modalIframe.src = ''; }, 250); 
-    };
-
-    document.querySelectorAll('#modalClose, #modalCloseBtn, #modalOverlay').forEach(el => {
-        el.addEventListener('click', closePreviewModal);
-    });
-
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-            if (previewModal.classList.contains('active')) closePreviewModal();
-            if (addModal.classList.contains('active')) closeAddModal();
-        }
-    });
-
-    // Impresión Directa desde Catálogo
-    document.querySelectorAll('.btn-print-direct').forEach(btn => {
+    // Imprimir items cargados en el HTML original
+    document.querySelectorAll('.card:not([data-id]) .btn-print-direct').forEach(btn => {
         btn.addEventListener('click', () => {
             const targetUrl = btn.dataset.target;
             if (!targetUrl) return;
@@ -214,13 +278,24 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Impresión desde Modal
+    // Cerrar modales
+    document.querySelectorAll('#modalClose, #modalCloseBtn, #modalOverlay').forEach(el => {
+        el.addEventListener('click', closePreviewModal);
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            if (previewModal.classList.contains('active')) closePreviewModal();
+            if (addModal.classList.contains('active')) closeAddModal();
+        }
+    });
+
+    // Imprimir desde el modal de vista previa
     modalPrintBtn.addEventListener('click', () => {
         if (modalIframe.contentWindow) {
             modalIframe.contentWindow.focus();
             modalIframe.contentWindow.print();
         } else {
-            // Fallback si es un PDF que el iframe no deja imprimir directo
             window.open(modalIframe.src, '_blank');
         }
     });

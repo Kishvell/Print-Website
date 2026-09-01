@@ -33,31 +33,38 @@
             padding: 40px 20px;
         }
 
-        /* --- VISUALIZACIÓN EN PANTALLA (Efecto Papel) --- */
+        /* --- VISUALIZACIÓN EN PANTALLA (Responsive) --- */
         .page {
             background: white;
-            width: 210mm;
-            /* Tamaño A4 */
+            width: 100%;
+            max-width: 210mm;
+            /* Tope máximo: Tamaño A4 */
             min-height: 297mm;
-            padding: 15mm;
+            padding: 20px;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
             border-radius: 4px;
             position: relative;
+            margin: 0 auto;
         }
 
-        /* Botón de impresión independiente (Se oculta al imprimir) */
+        /* Botón de impresión independiente */
         .no-print-bar {
             margin-bottom: 20px;
+            width: 100%;
+            max-width: 210mm;
+            display: flex;
+            justify-content: center;
         }
 
         .btn-print {
             background-color: #0f172a;
             color: white;
             border: none;
-            padding: 10px 20px;
+            padding: 12px 24px;
             border-radius: 6px;
             font-family: 'Inter', sans-serif;
             font-weight: 600;
+            font-size: 16px;
             cursor: pointer;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             transition: background 0.2s;
@@ -69,7 +76,6 @@
 
         /* --- DISEÑO DE LA AGENDA --- */
         header {
-            text-align: center;
             border-bottom: 2px solid var(--border-color);
             padding-bottom: 15px;
             margin-bottom: 20px;
@@ -105,8 +111,6 @@
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 20px;
-            height: calc(100% - 80px);
-            /* Ocupa el resto de la hoja */
         }
 
         /* Columna Izquierda: Días */
@@ -120,7 +124,7 @@
             border: 1px solid var(--border-color);
             border-radius: 4px;
             flex-grow: 1;
-            padding: 8px;
+            padding: 10px;
             min-height: 90px;
         }
 
@@ -142,7 +146,7 @@
         .tool-box {
             border: 1px solid var(--border-color);
             border-radius: 4px;
-            padding: 12px;
+            padding: 15px;
             background-color: #f8fafc;
         }
 
@@ -160,7 +164,7 @@
             display: flex;
             justify-content: space-between;
             margin-bottom: 15px;
-            padding: 0 10px;
+            padding: 0 5px;
         }
 
         .tracker-day {
@@ -184,7 +188,7 @@
         .writing-lines {
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 22px;
             margin-top: 15px;
         }
 
@@ -208,7 +212,7 @@
         .goal-list li {
             display: flex;
             align-items: flex-end;
-            margin-bottom: 15px;
+            margin-bottom: 18px;
             font-size: 13px;
         }
 
@@ -221,7 +225,7 @@
         }
 
         .goal-list .text {
-            width: 70px;
+            width: 75px;
             font-weight: 600;
         }
 
@@ -229,6 +233,30 @@
             flex-grow: 1;
             border-bottom: 1px solid #94a3b8;
             margin-left: 5px;
+        }
+
+        /* --- RESPONSIVE: CELULARES Y TABLETS (Solo pantalla) --- */
+        @media screen and (max-width: 768px) {
+            body {
+                padding: 15px 10px;
+            }
+
+            header {
+                flex-direction: column;
+                align-items: center;
+                gap: 15px;
+            }
+
+            .header-titles h1,
+            .header-titles p,
+            .date-input {
+                text-align: center;
+            }
+
+            .grid-layout {
+                grid-template-columns: 1fr;
+                /* 1 sola columna en celulares */
+            }
         }
 
         /* --- ESTILOS DE IMPRESIÓN --- */
@@ -245,15 +273,33 @@
 
             .no-print-bar {
                 display: none !important;
-                /* Oculta el botón al imprimir */
             }
 
             .page {
                 box-shadow: none;
                 border: none;
-                width: 100%;
-                min-height: 100%;
-                padding: 0;
+                width: 100% !important;
+                max-width: none !important;
+                min-height: auto !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+
+            header {
+                flex-direction: row !important;
+                justify-content: space-between !important;
+                align-items: flex-end !important;
+            }
+
+            .header-titles h1,
+            .header-titles p {
+                text-align: left !important;
+            }
+
+            .grid-layout {
+                grid-template-columns: 1fr 1fr !important;
+                /* Obliga a 2 columnas al imprimir */
+                gap: 15px !important;
             }
 
             .tool-box {
@@ -261,7 +307,7 @@
                 /* Ahorra tinta */
             }
 
-            /* Fuerza bordes negros definidos para impresoras B/N */
+            /* Fuerza bordes negros para impresoras B/N */
             * {
                 color: black !important;
                 border-color: black !important;
@@ -287,7 +333,7 @@
                 <p>Planificador Semanal Espiritual</p>
             </div>
             <div class="date-input">
-                Semana del: _________________________
+                Semana del: ______________________
             </div>
         </header>
 
@@ -323,7 +369,7 @@
 
                 <!-- 1. Registro de Escrituras -->
                 <div class="tool-box">
-                    <h3>📖 Estudio de las Escrituras</h3>
+                    <h3>📖 Estudio de Escrituras</h3>
                     <div class="scripture-tracker">
                         <div class="tracker-day"><span>L</span>
                             <div class="circle"></div>
@@ -378,15 +424,15 @@
 
                 <!-- 3. Preparación para el Templo -->
                 <div class="tool-box">
-                    <h3>🏛️ Enfoque de Templo e Historia Familiar</h3>
+                    <h3>🏛️ Templo e Historia Familiar</h3>
                     <p style="font-size: 11px; color: #475569; margin-bottom: 10px;">
-                        <i>Nombres a preparar, indexación, o planes de asistencia al templo.</i>
+                        <i>Nombres a preparar, indexación, o asistencia.</i>
                     </p>
                     <div class="dotted-line"></div>
                     <div class="dotted-line"></div>
                 </div>
 
-                <!-- 4. Reflexión Semanal (Se expande para llenar el espacio) -->
+                <!-- 4. Reflexión Semanal -->
                 <div class="tool-box" style="flex-grow: 1;">
                     <h3>✨ Reflexión Semanal</h3>
                     <p style="font-size: 12px; font-weight: 600; margin-bottom: 15px;">
@@ -404,7 +450,6 @@
 
             </div>
         </div>
-
     </div>
 
 </body>
